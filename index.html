@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>注文フォーム</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, select, button { display: block; margin-top: 10px; width: 100%; padding: 8px; }
+    button { background-color: #06C755; color: white; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2>注文フォーム</h2>
+
+<input type="text" id="userName" placeholder="名前を入力" required>
+
+<select id="staffRoom">
+    <option>職員室</option>
+    <option>生徒指導室</option>
+    <option>進路指導室</option>
+    <option>保健室</option>
+    <option>事務室</option>
+</select>
+
+<select id="itemName">
+    <option>お茶</option>
+    <option>コーヒー</option>
+    <option>チョコレート</option>
+    <option>ビスケット</option>
+</select>
+
+<input type="number" id="quantity" value="1" min="1" max="10">
+
+<button onclick="submitOrder()">注文する</button>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/【あなたのGAS URL】/exec"; // ← ここに差し替えて！
+
+    window.onload = function () {
+      liff.init({ liffId: "【あなたのLIFF ID】" })  // ← ここにLIFF IDを入力
+        .then(() => {
+        if (!liff.isLoggedIn()) {
+            liff.login();
+        }
+        })
+        .catch(err => alert("LIFF初期化エラー: " + err));
+    };
+
+    function submitOrder() {
+        const userName = document.getElementById("userName").value;
+        const staffRoom = document.getElementById("staffRoom").value;
+        const itemName = document.getElementById("itemName").value;
+        const quantity = document.getElementById("quantity").value;
+
+        if (!userName) {
+        alert("名前を入力してください");
+        return;
+    }
+
+    liff.getProfile().then(profile => {
+        const data = {
+        userName,
+        staffRoom,
+        itemName,
+        quantity,
+        userId: profile.userId
+        };
+
+        fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+            "Content-Type": "application/json"
+            }
+        })
+        .then(() => {
+            alert("注文が送信されました！");
+          liff.closeWindow(); // LINE画面を閉じる（任意）
+        })
+        .catch(err => {
+            console.error("送信エラー:", err);
+        alert("送信に失敗しました。");
+        });
+    });
+    }
+</script>
+</body>
+</html>
